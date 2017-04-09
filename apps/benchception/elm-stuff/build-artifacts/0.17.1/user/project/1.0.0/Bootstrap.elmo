@@ -1,0 +1,121 @@
+var _user$project$Bootstrap$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$none;
+};
+var _user$project$Bootstrap$view = function (model) {
+	var viewTiming = function (_p0) {
+		var _p1 = _p0;
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$h1,
+					_elm_lang$core$Native_List.fromArray(
+						[]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text(_p1._0)
+						])),
+					_elm_lang$html$Html$text(
+					_elm_lang$core$Basics$toString(_p1._1))
+				]));
+	};
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$List_ops['::'],
+			_elm_lang$html$Html$text('Benchmarks will appear here:'),
+			A2(_elm_lang$core$List$map, viewTiming, model.benchmarks)));
+};
+var _user$project$Bootstrap$newRepeat = F2(
+	function (f, n) {
+		newRepeat:
+		while (true) {
+			if (_elm_lang$core$Native_Utils.cmp(n, 0) < 1) {
+				return {ctor: '_Tuple0'};
+			} else {
+				var _p2 = f(
+					{ctor: '_Tuple0'});
+				var _v1 = f,
+					_v2 = n - 1;
+				f = _v1;
+				n = _v2;
+				continue newRepeat;
+			}
+		}
+	});
+var _user$project$Bootstrap$testFunc = function (_p3) {
+	var _p4 = _p3;
+	return {ctor: '_Tuple0'};
+};
+var _user$project$Bootstrap$Model = function (a) {
+	return {benchmarks: a};
+};
+var _user$project$Bootstrap$Noop = {ctor: 'Noop'};
+var _user$project$Bootstrap$BenchmarkDone = F2(
+	function (a, b) {
+		return {ctor: 'BenchmarkDone', _0: a, _1: b};
+	});
+var _user$project$Bootstrap$update = F2(
+	function (msg, model) {
+		var _p5 = msg;
+		if (_p5.ctor === 'BenchmarkDone') {
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						benchmarks: A2(
+							_elm_lang$core$List_ops['::'],
+							{ctor: '_Tuple2', _0: _p5._0, _1: _p5._1},
+							model.benchmarks)
+					}),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		} else {
+			return {
+				ctor: '_Tuple2',
+				_0: model,
+				_1: _elm_lang$core$Platform_Cmd$batch(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(
+							_Logiraptor$elm_bench$Bench$benchmark,
+							_user$project$Bootstrap$BenchmarkDone('Current Implementation'),
+							_Logiraptor$elm_bench$Bench$repeat(_user$project$Bootstrap$testFunc)),
+							A2(
+							_Logiraptor$elm_bench$Bench$benchmark,
+							_user$project$Bootstrap$BenchmarkDone('Proposed Implementation'),
+							_user$project$Bootstrap$newRepeat(_user$project$Bootstrap$testFunc))
+						]))
+			};
+		}
+	});
+var _user$project$Bootstrap$main = {
+	main: _elm_lang$html$Html_App$program(
+		{
+			init: {
+				ctor: '_Tuple2',
+				_0: {
+					benchmarks: _elm_lang$core$Native_List.fromArray(
+						[])
+				},
+				_1: A3(
+					_elm_lang$core$Task$perform,
+					function (_p6) {
+						return _user$project$Bootstrap$Noop;
+					},
+					function (_p7) {
+						return _user$project$Bootstrap$Noop;
+					},
+					_elm_lang$core$Process$sleep(_elm_lang$core$Time$millisecond * 1000))
+			},
+			view: _user$project$Bootstrap$view,
+			update: _user$project$Bootstrap$update,
+			subscriptions: _user$project$Bootstrap$subscriptions
+		})
+};

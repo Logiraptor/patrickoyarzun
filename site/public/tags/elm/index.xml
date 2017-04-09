@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Patrick Oyarzun</title>
+    <link>https://poyarzun.io/tags/elm/index.xml</link>
+    <description>Recent content on Patrick Oyarzun</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <copyright>Patrick Oyarzun All rights reserved.</copyright>
+    <atom:link href="https://poyarzun.io/tags/elm/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Benchmarking (Benchmarking Elm Functions)</title>
+      <link>https://poyarzun.io/blog/benchception/</link>
+      <pubDate>Wed, 26 Oct 2016 20:03:39 -0400</pubDate>
+      
+      <guid>https://poyarzun.io/blog/benchception/</guid>
+      <description>&lt;p&gt;In &lt;a href=&#34;https://poyarzun.io/blog/elm-bench/&#34;&gt;my last post&lt;/a&gt;, I released a benchmarking package for elm. I got some interesting feedback on reddit
+from user ianmackenzie. What if my benchmarking package is adding significant overhead to the things it&amp;rsquo;s trying to benchmark?
+I hadn&amp;rsquo;t made any particular effort to make it fast, so this is a great opportunity to try. As a matter of fact, I can use my
+benchmark package to benchmark the new implementation. Let&amp;rsquo;s try it out.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a complete demo app that uses the library to benchmark a new implementation of the &lt;code&gt;repeat&lt;/code&gt; function.
+It essentially tries to benchmark the function &lt;code&gt;\() -&amp;gt; ()&lt;/code&gt;, which is the simplest possible function I could think of.
+With any luck, the performance of the benchmarking tool should dominate.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;module Bootstrap exposing (..)
+
+import Bench
+import Html
+import Html.App as App
+import Time
+import Task
+import Process
+
+
+type alias Model =
+    { benchmarks : List ( String, Bench.Timing ) }
+
+
+type Msg
+    = BenchmarkDone String Bench.Timing
+    | Noop
+
+
+testFunc : () -&amp;gt; ()
+testFunc () =
+    ()
+
+
+newRepeat : (() -&amp;gt; b) -&amp;gt; Int -&amp;gt; ()
+newRepeat f n =
+    if n &amp;lt;= 0 then
+        ()
+    else
+        let
+            _ =
+                f ()
+        in
+            newRepeat f (n - 1)
+
+
+main : Program Never
+main =
+    App.program
+        { init =
+            ( { benchmarks = [] }
+            , Task.perform (\_ -&amp;gt; Noop) (\_ -&amp;gt; Noop) (Process.sleep (Time.millisecond * 1000))
+            )
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+
+view : Model -&amp;gt; Html.Html Msg
+view model =
+    let
+        viewTiming ( name, timing ) =
+            Html.div []
+                [ Html.h1 [] [ Html.text name ]
+                , Html.text (toString timing)
+                ]
+    in
+        Html.div [] ((Html.text &amp;quot;Benchmarks will appear here:&amp;quot;) :: (List.map viewTiming model.benchmarks))
+
+
+update : Msg -&amp;gt; Model -&amp;gt; ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        BenchmarkDone name timing -&amp;gt;
+            ( { model | benchmarks = ( name, timing ) :: model.benchmarks }, Cmd.none )
+
+        Noop -&amp;gt;
+            ( model
+            , Cmd.batch
+                [ Bench.benchmark (BenchmarkDone &amp;quot;Current Implementation&amp;quot;) (Bench.repeat testFunc)
+                , Bench.benchmark (BenchmarkDone &amp;quot;Proposed Implementation&amp;quot;) (newRepeat testFunc)
+                ]
+            )
+
+
+subscriptions : Model -&amp;gt; Sub Msg
+subscriptions model =
+    Sub.none
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you run this app (and make sure to pin the version of elm-bench at 1.0.0), you should see that the
+proposed implementation is around an order of magnitude faster! You can also check out the &lt;a href=&#34;https://poyarzun.io/apps/benchception&#34;&gt;live demo&lt;/a&gt;. As of now, the new implementation has
+been merged in as the default. I&amp;rsquo;ve also added the benchmarking app as a sub module so you can easily
+run small tests like this one. The &lt;a href=&#34;http://package.elm-lang.org/packages/Logiraptor/elm-bench/latest&#34;&gt;documentation is available on package.elm-lang.org&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Thanks for reading!&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

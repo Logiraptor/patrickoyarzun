@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="Hugo 0.17" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="//fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+<link rel="stylesheet" href="/css/normalize.css">
+<link rel="stylesheet" href="/css/skeleton.css">
+<link rel="stylesheet" href="/css/custom.css">
+<link rel="alternate" href="/index.xml" type="application/rss+xml" title="Patrick Oyarzun">
+<title>Benchmarking Elm Functions - Patrick Oyarzun</title>
+</head>
+<body>
+
+<div class="container">
+
+	<header role="banner">
+		<div class="header-logo">
+			<a href="/"><img src="https://www.gravatar.com/avatar/1bd0f98dad76d9b2f7efc49a984f69aa" width="60" height="60" alt="Patrick Oyarzun"></a>
+		</div>
+		
+	</header>
+
+
+	<main role="main">
+		<article itemscope itemtype="http://schema.org/BlogPosting">
+			<h1 class="entry-title" itemprop="headline">Benchmarking Elm Functions</h1>
+			<span class="entry-meta"><time itemprop="datePublished" datetime="2016-10-23">October 23, 2016</time></span>
+			<section itemprop="entry-text">
+				
+
+<h2 id="background">Background</h2>
+
+<p>I come from a background of mostly Go development. One thing I&rsquo;ve missed since starting
+to write Elm code is the lack of a good benchmarking tool like the one in Go&rsquo;s standard library.
+Porting the core of it to Elm was a good opportunity to learn about Elm&rsquo;s Task system.
+You can find <a href="http://package.elm-lang.org/packages/Logiraptor/elm-bench/latest">docs for the latest version of the code</a> in the elm package repository.</p>
+
+<h2 id="usage">Usage</h2>
+
+<p>The core API of the package is a single function:</p>
+
+<pre><code>
+benchmark : (Timing -&gt; msg) -&gt; (Int -&gt; a) -&gt; Cmd msg
+
+</code></pre>
+
+<p>The arguments, in order, are:</p>
+
+<ol>
+<li>a message constructor so benchmark can dispatch a Msg back to your app when the benchmark is finished.</li>
+<li>the function to be profiled.</li>
+</ol>
+
+<p>You&rsquo;re probably wondering why the type for your function must be <code>Int -&gt; a</code>.
+In order to reliably time a function which we know nothing about, we need to execute it many times. If the function is slow, maybe once is enough.
+If the function is fast, we need to execute it lots and lots of times in order to get a reliable result.
+So, in order to execute an arbitrary computation N times, it&rsquo;s best to just pass N to the caller and let
+them decide what&rsquo;s best. This gives the user of the library the most control in deciding how their code
+gets scaled up for performance testing. However, many times you won&rsquo;t want to do anything special,
+you just want to execute the same code over and over until the benchmark is reliable. In that case, there is a second function:</p>
+
+<pre><code>
+repeat : (() -&gt; a) -&gt; Int -&gt; ()
+
+</code></pre>
+
+<p>The repeat function takes and arbirary function and converts it into a form that benchmark can use. This way, if you just want to take the easy path,
+all you have to do is wrap your function in <code>repeat</code> and you&rsquo;re good to go.</p>
+
+<p>With just these basic building blocks, we can write the following:</p>
+
+<pre><code>module Main exposing(..)
+
+...
+import Bench
+
+type Msg = 
+    BenchmarkComplete Bench.Timing
+
+type alias Model =
+    { benchmark : Bench.Timing }
+
+update : Msg -&gt; Model -&gt; Model
+update msg model =
+    case msg of
+        BenchmarkComplete timing -&gt;
+            { model | benchmark = timing }
+
+startBenchmark : Cmd Msg
+startBenchmark =
+    Bench.benchmark BenchmarkComplete (Bench.repeat (\() -&gt; &quot;a&quot; + &quot;b&quot;))
+
+</code></pre>
+
+<p>Now if we return startBenchmark to the system as a command, we will receive the results in our
+update function when it&rsquo;s complete. In this case, we are benchmarking the time taken to append
+two strings. In reality, the compiler will likely optimize the concatenation into a noop, but this is the general idea.</p>
+
+<p>This is the first elm package I&rsquo;ve published publicly, so I&rsquo;d love to hear your feedback!</p>
+
+<p>Update: <a href="/blog/benchception">I benchmarked elm-bench using elm-bench!</a></p>
+
+			</section>
+		</article>
+	</main>
+
+
+	<footer role="contentinfo">
+		<div class="hr"></div>
+		<div class="footer-link">
+			<a href="mailto:patrickoyarzun@gmail.com" target="_blank">Email</a>
+			<a href="https://twitter.com/PatrickOyarzun" target="_blank">Twitter</a>
+			
+			<a href="https://github.com/Logiraptor/" target="_blank">GitHub</a>
+		</div>
+		<div class="copyright">Copyright &copy; Patrick Oyarzun All rights reserved.</div>
+	</footer>
+
+</div>
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-86222328-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</body>
+</html>

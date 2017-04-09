@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="Hugo 0.17" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="//fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+<link rel="stylesheet" href="/css/normalize.css">
+<link rel="stylesheet" href="/css/skeleton.css">
+<link rel="stylesheet" href="/css/custom.css">
+<link rel="alternate" href="/index.xml" type="application/rss+xml" title="Patrick Oyarzun">
+<title>Writing a LISP Interpreter in Go - Patrick Oyarzun</title>
+</head>
+<body>
+
+<div class="container">
+
+	<header role="banner">
+		<div class="header-logo">
+			<a href="/"><img src="https://www.gravatar.com/avatar/1bd0f98dad76d9b2f7efc49a984f69aa" width="60" height="60" alt="Patrick Oyarzun"></a>
+		</div>
+		
+	</header>
+
+
+	<main role="main">
+		<article itemscope itemtype="http://schema.org/BlogPosting">
+			<h1 class="entry-title" itemprop="headline">Writing a LISP Interpreter in Go</h1>
+			<span class="entry-meta"><time itemprop="datePublished" datetime="2014-02-28">February 28, 2014</time></span>
+			<section itemprop="entry-text">
+				<p>I&rsquo;ve wanted to write my own programming language since I started programming in highschool, but it always seemed impossible. I thought only the mythical wizards of the internet could actually forge their own language as a hobby. 5 years later and it turns out it&rsquo;s <a href="http://norvig.com/lispy.html">not</a> <a href="http://bobappleyard.wordpress.com/2010/02/18/writing-a-lisp-interpreter-in-go/">that</a> <a href="http://www.essenceandartifact.com/2012/09/how-to-create-turing-complete.html">hard</a>. (I didn&rsquo;t find that second one until after I had finished).</p>
+
+<p>I tried my hand at writing a few mini-languages, but they always felt over complicated for the small feature set they offered. I remembered reading that LISPs are super easy to parse and so decided that would be my next project, but first I needed to generalize this whole idea of parsing. I stumbled upon <a href="http://en.wikipedia.org/wiki/Parsing_expression_grammar">parsing expression grammars</a> and I was off. I wrote a peg parser over the weekend to make my life easier on future projects, which you can find <a href="https://github.com/Logiraptor/chicken">here</a>.</p>
+
+<p>Ok! Enough talking, here&rsquo;s the grammar for my LISP:</p>
+
+<pre><code>prgm &lt;- list+
+list &lt;- _?^ open atom_left+ close
+atom_left &lt;- atom _?^
+atom &lt;- number / name / list
+name &lt;- ~'[a-zA-Z/\-\*\+=&gt;&lt;]+'
+number &lt;- ~'-?\d+\.?\d*'
+open &lt;- '('
+close &lt;- ')'
+_ &lt;- ~'\s+'
+</code></pre>
+
+<p>So basically, there are two fundamental parts, numbers and names. Each are defined by regular expressions. The <code>~</code> denotes a regex in my peg parser. Everything else is pretty simple, aside from the <code>^</code> operator. A rule followed by <code>^</code> will be consumed from input normally, but will be discarded from the parse tree that is ultimately generated. Note that I use it to explicitly ignore whitespace between items in a list. This is not technically necessary, but it makes the interpreter a little cleaner since we can worry only about the stuff we care about.</p>
+
+<p>In order to evaluate the parse tree we need to transform it into some internal representation we can process easily. Go is strongly typed, so let&rsquo;s define some types to hold our program.
+<pre><code>type Atom interface{}
+type List []Atom
+type Number float64
+type Symbol string
+type Bool bool
+</code></pre>
+
+We&rsquo;ll take the easy way out and have only one type of number, <code>float64</code>. Javascript has made it this far, so it should do for a weekend project. Note that the Symbol type is not actually a string datatype. Symbol is used for a variable or function identifier, and it&rsquo;s internal representation is a Go string. The lisp does not support actual string values because that would complicate the grammar a bit and I wanted to keep it as simple as possible for the first real test of my peg library. One other interesting result is that <code>List</code> is automatically also an <code>Atom</code>.</p>
+
+<p>Now the transformation function:
+<pre><code>func transformPRGM(p *peg.ParseTree, out chan List) {
+    for _, child := range p.Children {
+        out &lt;- transform(child).(List)
+    }
+    close(out)
+}
+
+func transform(p *peg.ParseTree) Atom {
+    switch p.Type {
+    case "number":
+        val, err := strconv.ParseFloat(string(p.Data), 64)
+        if err != nil {
+            panic(err)
+        }
+        return Number(val)
+    case "name":
+        return Symbol(string(p.Data))
+    case "list":
+        var resp = make(List, len(p.Children[1].Children))
+        for i, child := range p.Children[1].Children {
+            resp[i] = transform(child)
+        }
+        return resp
+    default:
+        fmt.Println(p)
+        panic(fmt.Sprintf("Cannot transform %s", p.Type))
+    }
+}
+</code></pre>
+
+We see that the parse tree fills in a Type string on each node based on the rule that it satisfies, so we can just switch on that to determine the proper type to return. Also, we know that any number we encounter is a valid float because it satisfied the regular expression, so we panic on error instead of returning one since it should be a very rare case and I think can only be caused if the number literal is too big for a <code>float64</code> to represent. That&rsquo;s huge.</p>
+
+<p>Now that we have an internal representation, all we need are a few built-in functions and an eval function. We&rsquo;ll define the execution environment as follows:
+<pre><code>type Env struct {
+    mapping map[Symbol]Atom
+    outer   *Env
+}
+
+func (e *Env) find(s Symbol) map[Symbol]Atom {
+    if _, ok := e.mapping[s]; ok {
+        return e.mapping
+    } else if e.outer != nil {
+        return e.outer.find(s)
+    } else {
+        return nil
+    }
+}
+
+type FuncLit func(List) (Atom, error)
+
+func (f FuncLit) Call(l List) (Atom, error) {
+    return f(l)
+}
+
+type Procedure struct {
+    params List
+    body   Atom
+    env    *Env
+}
+
+func (p *Procedure) Call(l List) (Atom, error) {
+    return nil, fmt.Errorf("procedure call: tail recursion is required")
+}
+
+type Func interface {
+    Call(List) (Atom, error)
+}
+</code></pre>
+
+The purpose of <code>Env</code> is to manage function and variable bindings and also provides lexical scoping through the <code>find</code> method. We also define types for user-defined functions through Procedure, and Go defined functions through FuncLit. All that&rsquo;s left is eval!
+<pre><code>var QUOTE Symbol = "quote"
+var IF Symbol = "if"
+var SET Symbol = "set"
+var DEFINE Symbol = "define"
+var LAMBDA Symbol = "lambda"
+var BEGIN Symbol = "begin"
+
+func eval(a Atom, e *Env) (Atom, error) {
+    var err error
+    for {
+        switch a.(type) {
+        case Number:
+            return a, nil
+        case Symbol:
+            s := a.(Symbol)
+            return e.find(s)[s], nil
+        case List:
+            l := a.(List)
+            switch l[0] {
+            case QUOTE:
+                return l[1], nil
+            case IF:
+                test, conseq, alt := l[1], l[2], l[3]
+                t, err := eval(test, e)
+                if err != nil {
+                    return nil, err
+                }
+                if t.(Bool) {
+                    a = conseq
+                } else {
+                    a = alt
+                }
+            case SET:
+                name, exp := l[1].(Symbol), l[2]
+                e.find(name)[name], err = eval(exp, e)
+                return nil, err
+            case DEFINE:
+                name, exp := l[1].(Symbol), l[2]
+                e.mapping[name], err = eval(exp, e)
+                return nil, err
+            case LAMBDA:
+                vars, exp := l[1].(List), l[2]
+                return &amp;Procedure{
+                    vars, exp, e,
+                }, nil
+            case BEGIN:
+                for _, exp := range l[1 : len(l)-1] {
+                    _, err = eval(exp, e)
+                    if err != nil {
+                        return nil, err
+                    }
+                }
+                a = l[len(l)-1]
+            default:
+                exps := make([]Atom, len(l))
+                for i, exp := range l {
+                    exps[i], err = eval(exp, e)
+                    if err != nil {
+                        return nil, err
+                    }
+                }
+                proc := exps[0].(Func)
+                if p, ok := proc.(*Procedure); ok {
+                    a = p.body
+                    e = NewEnvFrom(p.params, exps[1:], p.env)
+                } else {
+                    x, err := proc.Call(exps[1:])
+                    if err != nil {
+                        return nil, fmt.Errorf("%s: %s", l[0], err)
+                    }
+                    return x, nil
+                }
+            }
+        default:
+            panic(fmt.Sprintf("Cannot eval %v", a))
+        }
+    }
+    return nil, nil
+}
+</code></pre>
+
+Here you see the built-in functions quote, if, set, define, lambda, and begin. We&rsquo;ve even got tail recursion! We can use these to define others. I&rsquo;ve defined arithmetic with Go functions using my <a href="https://github.com/Logiraptor/reflect">wrapper</a> which makes any function &ldquo;generic&rdquo;, but that uses Go reflection and is outside the scope of this post.</p>
+
+<p>I&rsquo;ll end with a sample of some code defined in the LISP and a benchmark against Go to show performance. (Hint, it&rsquo;s terrible, but ok for a weekend and my first time ever writing code in a LISP).
+<pre><code>(define factorial
+  (lambda (n)
+    (if (= n 0) 1
+        (* n (factorial (- n 1))))))
+(factorial 100)
+</code></pre>
+
+And the benchmark:
+<pre><code>PASS
+BenchmarkGoFact  5000000           648 ns/op
+BenchmarkCLISPFact     20000         96744 ns/op
+ok      github.com/Logiraptor/chickenLISP   6.821s
+</code></pre>
+
+That&rsquo;s all for now. Full source with tests/benchmark is available <a href="https://github.com/Logiraptor/chickenLISP">here</a>.</p>
+
+			</section>
+		</article>
+	</main>
+
+
+	<footer role="contentinfo">
+		<div class="hr"></div>
+		<div class="footer-link">
+			<a href="mailto:patrickoyarzun@gmail.com" target="_blank">Email</a>
+			<a href="https://twitter.com/PatrickOyarzun" target="_blank">Twitter</a>
+			
+			<a href="https://github.com/Logiraptor/" target="_blank">GitHub</a>
+		</div>
+		<div class="copyright">Copyright &copy; Patrick Oyarzun All rights reserved.</div>
+	</footer>
+
+</div>
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-86222328-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</body>
+</html>

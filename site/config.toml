@@ -1,0 +1,13 @@
+baseurl = "https://poyarzun.io/"
+languageCode = "en-US"
+title = "Patrick Oyarzun"
+copyright = "Patrick Oyarzun All rights reserved."
+googleAnalytics = "UA-86222328-1"
+theme = "hugo-zen"
+
+[params]
+  logo      = "https://www.gravatar.com/avatar/1bd0f98dad76d9b2f7efc49a984f69aa"
+  twitter   = "https://twitter.com/PatrickOyarzun"
+  github    = "https://github.com/Logiraptor/"
+  email     = "patrickoyarzun@gmail.com"
+  analytics = "UA-86222328-1"

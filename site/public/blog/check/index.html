@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="Hugo 0.17" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="//fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+<link rel="stylesheet" href="/css/normalize.css">
+<link rel="stylesheet" href="/css/skeleton.css">
+<link rel="stylesheet" href="/css/custom.css">
+<link rel="alternate" href="/index.xml" type="application/rss+xml" title="Patrick Oyarzun">
+<title>Check: Experimental type checker for reflection heavy Go programs - Patrick Oyarzun</title>
+</head>
+<body>
+
+<div class="container">
+
+	<header role="banner">
+		<div class="header-logo">
+			<a href="/"><img src="https://www.gravatar.com/avatar/1bd0f98dad76d9b2f7efc49a984f69aa" width="60" height="60" alt="Patrick Oyarzun"></a>
+		</div>
+		
+	</header>
+
+
+	<main role="main">
+		<article itemscope itemtype="http://schema.org/BlogPosting">
+			<h1 class="entry-title" itemprop="headline">Check: Experimental type checker for reflection heavy Go programs</h1>
+			<span class="entry-meta"><time itemprop="datePublished" datetime="2015-02-09">February 09, 2015</time></span>
+			<section itemprop="entry-text">
+				
+
+<p>Before getting into the content of this post, I&rsquo;d like to make something clear. Don&rsquo;t use this in production. I&rsquo;m not even sure this is a good idea, but it&rsquo;s an idea I&rsquo;ve had for a while.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Go doesn&rsquo;t have a lot of things. It&rsquo;s very spartan in that way. I think it&rsquo;s a good thing, but when reading about Go you will unavoidably find people who disagree. I&rsquo;m not going to talk about that because there are tons of articles and blog posts which discuss the issue at great length. The goal here is to see what is possible with Go in its current state.</p>
+
+<p>So, how do I write the classic map function in Go? If you ask someone who has embraced Go&rsquo;s style, the answer will probably be &ldquo;use a for loop&rdquo;. For example, if you want the equivalent of Python&rsquo;s <code>map(lambda x: x*x, [1,2,3])</code>, you might write:</p>
+
+<pre><code class="language-Go">var input = []int {1, 2, 3}
+var output = make([]int, len(input))
+
+for i, x := range input {
+	output[i] = x * x
+}
+</code></pre>
+
+<p>It&rsquo;s that simple. There is no question of what this code does, and anyone with a decent understanding of programming can immediately read and understand it. But what if we don&rsquo;t care and we want to be able to write this:</p>
+
+<pre><code class="language-Go">output := Map(func(i int) int {
+	return i * i
+}, []int{1, 2, 3})
+</code></pre>
+
+<p>Well, we can. Define Map like so:</p>
+
+<pre><code class="language-Go">func Map(fn func(int)int, in []int) []int {
+	out := make([]int, len(in))
+	for i, x := range in {
+		out[i] = fn(x)
+	}
+	return out
+}
+</code></pre>
+
+<p>This feels like cheating though, because we can&rsquo;t use that function with anything but ints. We can achieve a fully &ldquo;generic&rdquo; solution with reflection like so:</p>
+
+<pre><code class="language-Go">import &quot;github.com/Logiraptor/fun&quot;
+
+func Map(fn interface{}, arr interface{}) interface{} {
+	types := fun.Check(func(func(fun.A) fun.B, []fun.A) {}, fn, arr)
+	outType := types[fun.BKey]
+
+	output := reflect.New(reflect.SliceOf(outType)).Elem()
+	funV := reflect.ValueOf(fn)
+	slice := reflect.ValueOf(arr)
+	length := slice.Len()
+	for i := 0; i &lt; length; i++ {
+		x := funV.Call([]reflect.Value{slice.Index(i)})[0]
+		output = reflect.Append(output, x)
+	}
+
+	return output.Interface()
+}
+</code></pre>
+
+<p>It&rsquo;s a bit longer, and we&rsquo;ve thrown type safety out the window, but we can almost write the code we wanted. The call to <code>fun.Check</code> is another bit of reflection code that does simple template-style type checking at runtime. These will all compile just fine now:</p>
+
+<pre><code class="language-Go">// =&gt; [1, 4, 9]
+output := Map(func(i int) int {
+	return i * i
+}, []int{1, 2, 3}).([]int)
+
+// =&gt; [0, 3, 2]
+output := Map(func(s string) int {
+	return len(s)
+}, []string{&quot;&quot;, &quot;foo&quot;, &quot;go&quot;}).([]int)
+
+// uh-oh...
+output := Map(func(s string) int {
+	return len(s)
+}, []int{1, 2, 3}).([]int)
+
+Map(true, &quot;panic&quot;)
+Map(&quot;no type checking&quot;, 78)
+</code></pre>
+
+<p>Notice that by using reflection, we&rsquo;ve lost the ability to check types statically. The last 3 invocations will panic at runtime with a less than readable error. For me, static typing is a <strong>huge</strong> reason why I&rsquo;m productive in Go. The task before us is to get back some static verification without changing the Go language at all. So that&rsquo;s what I did. I have a toy program called check which can look at that program and tell me statically that the <code>func(string) int</code> doesn&rsquo;t match the <code>[]int</code>. It&rsquo;s ~200 lines of Go apart from the standard library + tools. It makes extensive use of <code>go/types</code> for the actual work, and it&rsquo;s actually surprisingly general. To use it, you just run <code>check &quot;Map(func(A)B, []A)&quot;</code>. Or, if you want to be hip, you can use <code>go generate</code> like so:</p>
+
+<pre><code>//go:generate check &quot;Map(func(A)B, []A)&quot;
+
+// We can check reduce too!
+//go:generate check &quot;Reduce(func(A, B) A, A, []B)&quot;
+</code></pre>
+
+<p>Check will parse &ldquo;Map(func(A)B, []A)&rdquo; and treat A and B as type variables which can be unified with any other type. Of course, all instances of a specific type variable must unify with the same type.</p>
+
+<h2 id="limitations">Limitations</h2>
+
+<p>I feel the need to repeat: this is just a toy program to experiment with writing my first static analysis tool. It&rsquo;s probably a terrible idea in the first place. These are the problems I see with it:</p>
+
+<ol>
+<li>The function (e.g. Map) must be defined locally.</li>
+<li>It doesn&rsquo;t verify the result type so a nested Map call will not type check properly.</li>
+<li>The function name must be unique among all call expressions in the entire program. So, you can&rsquo;t call <code>other.Map</code> without it trying to type check that as well.</li>
+<li>Since it&rsquo;s not part of the compiler, it&rsquo;s not guaranteed to run before compilation.</li>
+<li>This is classic overuse of reflection.</li>
+<li>check is not a very creative name.</li>
+</ol>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>I think the coolest part of all this is that I was able to write this whole thing while taking notes at my university in 3 days. I see it as a testament to the standard library that it&rsquo;s so short and so easy to do.</p>
+
+			</section>
+		</article>
+	</main>
+
+
+	<footer role="contentinfo">
+		<div class="hr"></div>
+		<div class="footer-link">
+			<a href="mailto:patrickoyarzun@gmail.com" target="_blank">Email</a>
+			<a href="https://twitter.com/PatrickOyarzun" target="_blank">Twitter</a>
+			
+			<a href="https://github.com/Logiraptor/" target="_blank">GitHub</a>
+		</div>
+		<div class="copyright">Copyright &copy; Patrick Oyarzun All rights reserved.</div>
+	</footer>
+
+</div>
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-86222328-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</body>
+</html>

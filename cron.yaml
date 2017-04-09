@@ -1,0 +1,4 @@
+cron:
+- description: journal reminder email
+  url: /journal/reminder
+  schedule: every friday 18:00
