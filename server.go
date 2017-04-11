@@ -1,14 +1,20 @@
-package patrickoyarzun
+package main
 
 import (
 	"net/http"
+	"os"
 )
 
 func init() {
-	journals := NewJournalHandler()
-	http.HandleFunc("/journal/reminder", journals.Reminder)
-	http.HandleFunc("/journal", journals.View)
-	http.HandleFunc("/_ah/mail/", journals.ReceiveEntry)
 	http.Handle("/", http.FileServer(http.Dir("site/public")))
 	http.Handle("/apps/", http.StripPrefix("/apps", http.FileServer(http.Dir("apps"))))
+}
+
+func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	http.ListenAndServe(":"+port, nil)
 }
