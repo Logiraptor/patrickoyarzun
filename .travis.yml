@@ -1,0 +1,18 @@
+
+script:
+ - cd site
+ - wget https://github.com/gohugoio/hugo/releases/download/v0.24.1/hugo_0.24.1_Linux-64bit.tar.gz
+ - tar -xvf hugo_0.24.1_Linux-64bit.tar.gz
+ - ./hugo
+
+deploy:
+  provider: cloudfoundry
+  api: api.run.pez.pivotal.io
+  username: patrickoyarzun@gmail.com
+  password:
+    secure: YCtwrg8vdQUmeDlgker/kxnFoqiD5mqaVWoBY91VMfwpG37cGPjtpPs0/P8txtTnywi8wDiRvX2MGUaMKE15g+X4W7UAX5Hp57JdbJpKwpgGxeLiCE9z7gnjZVmjJm7HMYqvejXE/EOjbJHfG1aTnbWeYH0CJp/ekzIHZuXk3MjPYbftY2DrBa9f/Chr3fRpjYiKWR/myRLo6sC9QQV271oANEc8x1GPNXMaAmdt4UZExc17ss1DPhtE5zhBKj9y1knPgedg60b9gaVPLGHhLdOhMbW2EhwSVf5oZ55JGjENOV5AyGinC4ySJUuUjD/L4qogOV3y9XiceDug6dn55tlfw6d7hpBwVQn63NNqF7CbKVbY06LShw9+O1LJk7ZeisLVoRy49WwN6l8zuJkT2BO/e/HHSlmkYlSZtYnWtEMobbWhjiTkslBwBczdadPly/s2RLBeai2VwYQ3Vbt+h3eEsmIQds9pDDo+IS+PQazaG3HBUzDIUkLYsF+XNWHz4QRdzGyBhuP8cEtpjMfyDBWdEZlG3yK9+qO4wL81NXU+M1bVUiM5bgnJUOnx+HBfHXDSve0fIENH/gt3rjVYiZGwMt9W+q1/SicjGbIU8toKU3Q7dkTug92zsXFpo19A9zbcC0fbWC53ZfIowoH/+YZ3jvaa4TPGiTOc/yuNQ5U=
+  organization: pivot-poyarzun
+  space: development
+  on:
+    repo: Logiraptor/patrickoyarzun
+    tags: true
