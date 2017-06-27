@@ -1,9 +1,10 @@
 
 script:
- - cd site
+ - pushd site
  - wget https://github.com/gohugoio/hugo/releases/download/v0.24.1/hugo_0.24.1_Linux-64bit.tar.gz
  - tar -xvf hugo_0.24.1_Linux-64bit.tar.gz
  - ./hugo
+ - popd
 
 deploy:
   provider: cloudfoundry
