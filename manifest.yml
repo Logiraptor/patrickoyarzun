@@ -5,3 +5,5 @@ applications:
   buildpack: go_buildpack
   env:
     GOPACKAGENAME: main
+  routes:
+   - route: www.poyarzun.io
