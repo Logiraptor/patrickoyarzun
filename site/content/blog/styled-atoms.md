@@ -7,7 +7,6 @@ tags = [
 title = "Typesafe Atomic Design with Typescript & Webpack"
 date = "2017-06-26T21:00:00-04:00"
 slug = ""
-draft = true
 +++
 
 

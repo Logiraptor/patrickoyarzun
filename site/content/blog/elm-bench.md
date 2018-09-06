@@ -6,6 +6,8 @@ highlight = true
 
 +++
 
+> Update: 9/5/2018 - See [elm-benchmark](https://www.brianthicks.com/post/2017/02/27/introducing-elm-benchmark/) for a more up to date package.
+
 ## Background
 
 I come from a background of mostly Go development. One thing I've missed since starting 
