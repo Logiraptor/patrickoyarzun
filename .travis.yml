@@ -14,3 +14,5 @@ deploy:
   space: development
   on:
     repo: Logiraptor/patrickoyarzun
+    tags: true
+
