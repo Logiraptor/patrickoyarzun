@@ -1,17 +1,15 @@
-
 script:
- - pushd site
- - wget https://github.com/gohugoio/hugo/releases/download/v0.31/hugo_0.31_Linux-64bit.tar.gz
- - tar -xvf hugo_0.31_Linux-64bit.tar.gz
- - ./hugo
- - popd
-
+- pushd site
+- wget https://github.com/gohugoio/hugo/releases/download/v0.31/hugo_0.31_Linux-64bit.tar.gz
+- tar -xvf hugo_0.31_Linux-64bit.tar.gz
+- "./hugo"
+- popd
 deploy:
   provider: cloudfoundry
-  api: api.run.pez.pivotal.io
-  username: patrickoyarzun@gmail.com
+  api: api.run.pcfbeta.io
+  username: poyarzun-ci
   password:
-    secure: YCtwrg8vdQUmeDlgker/kxnFoqiD5mqaVWoBY91VMfwpG37cGPjtpPs0/P8txtTnywi8wDiRvX2MGUaMKE15g+X4W7UAX5Hp57JdbJpKwpgGxeLiCE9z7gnjZVmjJm7HMYqvejXE/EOjbJHfG1aTnbWeYH0CJp/ekzIHZuXk3MjPYbftY2DrBa9f/Chr3fRpjYiKWR/myRLo6sC9QQV271oANEc8x1GPNXMaAmdt4UZExc17ss1DPhtE5zhBKj9y1knPgedg60b9gaVPLGHhLdOhMbW2EhwSVf5oZ55JGjENOV5AyGinC4ySJUuUjD/L4qogOV3y9XiceDug6dn55tlfw6d7hpBwVQn63NNqF7CbKVbY06LShw9+O1LJk7ZeisLVoRy49WwN6l8zuJkT2BO/e/HHSlmkYlSZtYnWtEMobbWhjiTkslBwBczdadPly/s2RLBeai2VwYQ3Vbt+h3eEsmIQds9pDDo+IS+PQazaG3HBUzDIUkLYsF+XNWHz4QRdzGyBhuP8cEtpjMfyDBWdEZlG3yK9+qO4wL81NXU+M1bVUiM5bgnJUOnx+HBfHXDSve0fIENH/gt3rjVYiZGwMt9W+q1/SicjGbIU8toKU3Q7dkTug92zsXFpo19A9zbcC0fbWC53ZfIowoH/+YZ3jvaa4TPGiTOc/yuNQ5U=
+    secure: jQW8in7thgL6p6dCkmN9/5XleCC3wgrXKTKs3pPk0yRI/xUExvG1VDQNJztVsgnnmsJBr0MIFO43QqoI8yAQsu0KdTEIH447YHt1Vy4yc1s3Y1/fVrfnbIVjs/oF1bYRx3bGEt9GNfzp/1J2acw+UC8dc4iVaxj7rOcngD5iC89JQU3utVzU22maxzoziKedBlpH1kRBDf5VVYenCtRDdVOncjA2UTwQ3j8dCo7fs3lm0j7VBn0zAI8zM08BWTyf001Gwsz8FpLK11F2lg+y5m/RY4O1ZhHbAWi85NcbGTbNMNGnIcRqlvSvS4S6k0KwhpTkCj5xOliUfzmBl7GCFhg3AavVOaCUGMOHZiJer8jmKgxOPRU2C5qlA6SIjT/CznIkSL6uYE+59EBHJxmj4h1ApH12kDALPgb53LsHkXK0Jvvp7Rk3axWUobORPzAfh/yLk0xdTMhhgkWVGGYVOUJaWy92mX+UuoYS0+foRg+dcQjI38qYkFDYBbLM+bskCiJFo/EqoJdf8W/F5z9KR+MC48hmvjE4BGhIWjJsxs4tPUfkH8qUk10qUTN+Esnt1JNX/wIebPaSpJb38DMbQUMUQ4Xz3WbgCCwCgZSvlazg8Fe4eZ13ZsqUcjQ0G9cQVFQ8nOsOud9dCzx6rJSrNLcnmBRB4L1EJ4IGg9unXY4=
   organization: pivot-poyarzun
   space: development
   on:
