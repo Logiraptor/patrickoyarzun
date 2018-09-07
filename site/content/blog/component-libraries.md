@@ -12,22 +12,22 @@ Style Guide
 : A document which defines a brand. This typically includes things like **colors**, **logos**, **fonts**, and *maybe* **form control styles**. They are useful when designing completely new assets and enforce a consistent look and feel.
 
 Component
-: a meaningful unit of an interface. It could be a single HTML element - e.g. a header, a collection of elements - e.g. a form, or a complete page. Components can and should contain other components when it makes sense.
+: A meaningful unit of an interface. It could be a single HTML element - e.g. a header, a collection of elements - e.g. a form, or a complete page. Components can and should contain other components when it makes sense.
 
 Component Library
-: a library of components. Inside you will find **self-contained**, **reusable**, **named** **components**. This may or may not include a style guide as one part of the library. An important characteristic is that the component library must reference the same code as the production system.
+: A library of components. Inside you will find **self-contained**, **reusable**, **named** **components**. This may or may not include a style guide as one part of the library. An important characteristic is that the component library must reference the same code as the production system.
 
 Living Style Guide
-: the same thing as a component library.
+: The same thing as a component library.
 
 Design System
-: a tool used by product teams to guide visual design work and enable a consistent user experience. It typically takes the form of several artifacts including style guides, component libraries, mood boards, etc.
+: A tool used by product teams to guide visual design work and enable a consistent user experience. It typically takes the form of several artifacts including style guides, component libraries, mood boards, etc.
 
 Engineer
-: a person who turns user stories into code.
+: A person who turns user stories into code.
 
 Designer
-: a person who turns user research into visual designs.
+: A person who turns user research into visual designs.
 
 # Why build a component library?
 
