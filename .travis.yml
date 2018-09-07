@@ -1,7 +1,7 @@
 script:
 - pushd site
-- wget https://github.com/gohugoio/hugo/releases/download/v0.31/hugo_0.31_Linux-64bit.tar.gz
-- tar -xvf hugo_0.31_Linux-64bit.tar.gz
+- wget https://github.com/gohugoio/hugo/releases/download/v0.48/hugo_0.48_Linux-64bit.tar.gz
+- tar -xvf hugo_0.48_Linux-64bit.tar.gz
 - "./hugo"
 - popd
 deploy:
