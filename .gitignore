@@ -8,3 +8,4 @@ packr2
 packr.tar.gz
 ./packrd
 *-packr.go
+_gen/

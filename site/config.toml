@@ -2,7 +2,6 @@ baseurl = "https://poyarzun.io/"
 languageCode = "en-US"
 title = "Patrick Oyarzun"
 copyright = "Patrick Oyarzun All rights reserved."
-googleAnalytics = "UA-86222328-1"
 theme = "hugo-zen"
 
 [params]
@@ -10,4 +9,3 @@ theme = "hugo-zen"
   twitter   = "https://twitter.com/PatrickOyarzun"
   github    = "https://github.com/Logiraptor/"
   email     = "blog@poyarzun.io"
-  analytics = "UA-86222328-1"

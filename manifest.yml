@@ -1,9 +1,5 @@
 ---
 applications:
 - name: poyarzun
-  memory: 128M
-  buildpack: go_buildpack
-  env:
-    GOPACKAGENAME: main
-  routes:
-   - route: www.poyarzun.io
+  path: site/public/
+  buildpack: staticfile_buildpack

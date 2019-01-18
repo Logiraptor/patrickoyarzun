@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 {{ .Hugo.Generator }}
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="//fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
-<link rel="stylesheet" href="/css/normalize.css">
-<link rel="stylesheet" href="/css/skeleton.css">
-<link rel="stylesheet" href="/css/custom.css">
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
+{{ $normalize := resources.Get "css/normalize.css" -}}
+{{ $skeleton := resources.Get "css/skeleton.css" -}}
+{{ $custom := resources.Get "css/custom.css" -}}
+{{ $css := slice $normalize $skeleton $custom | resources.Concat "css/bundle.css" | minify | fingerprint "md5" -}}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}">
 <link rel="alternate" href="/index.xml" type="application/rss+xml" title="{{ .Site.Title }}">
 <title>{{ $isHomePage := eq .Title .Site.Title }}{{ .Title }}{{ if eq $isHomePage false }} - {{ .Site.Title }}{{ end }}</title>
 </head>
