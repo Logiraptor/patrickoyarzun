@@ -1,1 +1,10 @@
 site/public/
+.idea/
+hugo
+hugo.tar.gz
+gin-bin
+main
+packr2
+packr.tar.gz
+./packrd
+*-packr.go

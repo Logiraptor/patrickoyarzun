@@ -1,9 +1,5 @@
 script:
-- pushd site
-- wget https://github.com/gohugoio/hugo/releases/download/v0.48/hugo_0.48_Linux-64bit.tar.gz
-- tar -xvf hugo_0.48_Linux-64bit.tar.gz
-- "./hugo"
-- popd
+- make
 deploy:
   provider: cloudfoundry
   api: api.run.pcfbeta.io

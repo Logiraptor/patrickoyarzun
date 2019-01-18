@@ -3,11 +3,16 @@ package main
 import (
 	"net/http"
 	"os"
+	"log"
+	"github.com/gobuffalo/packr/v2"
+	"github.com/NYTimes/gziphandler"
 )
 
-func init() {
-	http.Handle("/", http.FileServer(http.Dir("site/public")))
-	http.Handle("/apps/", http.StripPrefix("/apps", http.FileServer(http.Dir("apps"))))
+func newServer() http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(packr.New("Static Assets", "site/public")))
+	mux.Handle("/apps/", http.StripPrefix("/apps", http.FileServer(http.Dir("apps"))))
+	return gziphandler.GzipHandler(mux)
 }
 
 func main() {
@@ -16,5 +21,5 @@ func main() {
 		port = "3000"
 	}
 
-	http.ListenAndServe(":"+port, nil)
+	log.Fatal(http.ListenAndServe(":"+port, newServer()))
 }
