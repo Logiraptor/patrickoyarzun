@@ -8,7 +8,7 @@ title = "Check: Experimental type checker for reflection heavy Go programs"
 
 Before getting into the content of this post, I'd like to make something clear. Don't use this in production. I'm not even sure this is a good idea, but it's an idea I've had for a while. 
 
-## Introduction
+# Introduction
 
 Go doesn't have a lot of things. It's very spartan in that way. I think it's a good thing, but when reading about Go you will unavoidably find people who disagree. I'm not going to talk about that because there are tons of articles and blog posts which discuss the issue at great length. The goal here is to see what is possible with Go in its current state. 
 
@@ -100,7 +100,7 @@ Notice that by using reflection, we've lost the ability to check types staticall
 Check will parse "Map(func(A)B, []A)" and treat A and B as type variables which can be unified with any other type. Of course, all instances of a specific type variable must unify with the same type. 
 
 
-## Limitations
+# Limitations
 
 I feel the need to repeat: this is just a toy program to experiment with writing my first static analysis tool. It's probably a terrible idea in the first place. These are the problems I see with it:
 
@@ -111,6 +111,6 @@ I feel the need to repeat: this is just a toy program to experiment with writing
 5. This is classic overuse of reflection.
 6. check is not a very creative name.
 
-## Conclusion
+# Conclusion
 
 I think the coolest part of all this is that I was able to write this whole thing while taking notes at my university in 3 days. I see it as a testament to the standard library that it's so short and so easy to do.
