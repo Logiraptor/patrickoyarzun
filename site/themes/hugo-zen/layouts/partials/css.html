@@ -1,0 +1,8 @@
+
+{{- $normalize := resources.Get "css/normalize.css" -}}
+{{ $skeleton := resources.Get "css/skeleton.css" -}}
+{{ $custom := resources.Get "css/custom.css" -}}
+{{ $roboto := resources.Get "css/roboto.css" -}}
+
+{{ $css := slice $normalize $skeleton $custom $roboto | resources.Concat "css/bundle.css" | minify | fingerprint "md5" -}}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}">
