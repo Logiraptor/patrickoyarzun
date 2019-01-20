@@ -1,10 +1,12 @@
 
-{{- $normalize := resources.Get "css/normalize.css" -}}
-{{ $skeleton := resources.Get "css/skeleton.css" -}}
-{{ $custom := resources.Get "css/custom.css" -}}
-{{ $roboto := resources.Get "css/roboto.css" -}}
+{{- $scss_options := (dict "outputStyle" "compressed") -}}
+
+{{ $normalize := resources.Get "css/normalize.scss" | resources.ToCSS $scss_options -}}
+{{ $custom := resources.Get "css/custom.scss" | resources.ToCSS $scss_options -}}
+{{ $roboto := resources.Get "css/roboto.scss" | resources.ToCSS $scss_options -}}
+{{ $skeleton := resources.Get "css/skeleton.scss" | resources.ToCSS $scss_options -}}
 
 {{ $css := slice $normalize $skeleton $custom $roboto | resources.Concat "css/bundle.css" | minify -}}
-{{with $css}}
-<style>{{ .Content | safeCSS }}</style>
-{{end}}
+
+
+<style>{{ $css.Content | safeCSS }}</style>

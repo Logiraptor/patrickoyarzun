@@ -3,10 +3,10 @@ HUGO_VERSION := 0.53
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	HUGO_URL := https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz
+	HUGO_URL := https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_Linux-64bit.tar.gz
 endif
 ifeq ($(UNAME_S),Darwin)
-	HUGO_URL := https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_macOS-64bit.tar.gz
+	HUGO_URL := https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_macOS-64bit.tar.gz
 endif
 
 .PHONY: clean

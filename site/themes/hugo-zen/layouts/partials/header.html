@@ -1,12 +1,14 @@
 <!DOCTYPE html>
+{{ $isHomePage := eq .Title .Site.Title }}
 <html lang="{{ with .Site.LanguageCode }}{{ . }}{{ else }}en-US{{ end }}">
 <head>
 <meta charset="utf-8">
 {{ .Hugo.Generator }}
+<meta name="Description" content="{{ if eq $isHomePage false }}{{ .Summary }}{{else}}{{ .Site.Title }}{{ end }}">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {{ partial "css.html" . }}
 <link rel="alternate" href="/index.xml" type="application/rss+xml" title="{{ .Site.Title }}">
-<title>{{ $isHomePage := eq .Title .Site.Title }}{{ .Title }}{{ if eq $isHomePage false }} - {{ .Site.Title }}{{ end }}</title>
+<title>{{ .Title }}{{ if eq $isHomePage false }} - {{ .Site.Title }}{{ end }}</title>
 </head>
 <body>
 
