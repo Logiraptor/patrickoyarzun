@@ -4,5 +4,7 @@
 {{ $custom := resources.Get "css/custom.css" -}}
 {{ $roboto := resources.Get "css/roboto.css" -}}
 
-{{ $css := slice $normalize $skeleton $custom $roboto | resources.Concat "css/bundle.css" | minify | fingerprint "md5" -}}
-<link rel="stylesheet" href="{{ $css.RelPermalink }}">
+{{ $css := slice $normalize $skeleton $custom $roboto | resources.Concat "css/bundle.css" | minify -}}
+{{with $css}}
+<style>{{ .Content | safeCSS }}</style>
+{{end}}

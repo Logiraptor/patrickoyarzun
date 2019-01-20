@@ -11,10 +11,13 @@ endif
 
 .PHONY: clean
 
-site/public/BUILD_METADATA: hugo $(shell find site -type f | grep -v site/public)
+site/public/BUILD_METADATA: hugo site/assets/img/avatar.png $(shell find site -type f | grep -v site/public)
 	cd site; ../hugo
 	date > site/public/BUILD_METADATA
 	git log -1 --pretty=format:%H >> site/public/BUILD_METADATA
+
+site/assets/img/avatar.png:
+	wget -O site/assets/img/avatar.png https://www.gravatar.com/avatar/1bd0f98dad76d9b2f7efc49a984f69aa
 
 hugo:
 	#
