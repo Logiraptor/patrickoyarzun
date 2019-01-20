@@ -28,7 +28,6 @@
 
 /* Grid
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-$link_color: #0E5E77;
 
 .container {
   position: relative;
@@ -160,7 +159,7 @@ p {
 /* Links
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 a {
-  color: $link_color; }
+  color: #0E5E77; }
 a:hover {
   color: #0FA0CE; }
 
@@ -221,8 +220,8 @@ input[type="submit"].button-primary:focus,
 input[type="reset"].button-primary:focus,
 input[type="button"].button-primary:focus {
   color: #FFF;
-  background-color: $link_color;
-  border-color: $link_color; }
+  background-color: #0E5E77;
+  border-color: #0E5E77; }
 
 
 /* Forms

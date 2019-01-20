@@ -1,4 +1,3 @@
-$subtext_color: #545454;
 
 body {
   font-family: "Roboto", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -61,7 +60,7 @@ main {
   display: inline-block;
   margin-bottom: 2rem;
   font-size: 1.7rem;
-  color: $subtext_color;
+  color: #545454;
 }
 
 .footer-link {
