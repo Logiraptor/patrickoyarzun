@@ -2,13 +2,12 @@ script:
 - make
 deploy:
   provider: cloudfoundry
-  api: api.run.pcfbeta.io
-  username: poyarzun-ci
+  api: api.run.pcfone.io
+  username: ci@poyarzun.io
   password:
-    secure: jQW8in7thgL6p6dCkmN9/5XleCC3wgrXKTKs3pPk0yRI/xUExvG1VDQNJztVsgnnmsJBr0MIFO43QqoI8yAQsu0KdTEIH447YHt1Vy4yc1s3Y1/fVrfnbIVjs/oF1bYRx3bGEt9GNfzp/1J2acw+UC8dc4iVaxj7rOcngD5iC89JQU3utVzU22maxzoziKedBlpH1kRBDf5VVYenCtRDdVOncjA2UTwQ3j8dCo7fs3lm0j7VBn0zAI8zM08BWTyf001Gwsz8FpLK11F2lg+y5m/RY4O1ZhHbAWi85NcbGTbNMNGnIcRqlvSvS4S6k0KwhpTkCj5xOliUfzmBl7GCFhg3AavVOaCUGMOHZiJer8jmKgxOPRU2C5qlA6SIjT/CznIkSL6uYE+59EBHJxmj4h1ApH12kDALPgb53LsHkXK0Jvvp7Rk3axWUobORPzAfh/yLk0xdTMhhgkWVGGYVOUJaWy92mX+UuoYS0+foRg+dcQjI38qYkFDYBbLM+bskCiJFo/EqoJdf8W/F5z9KR+MC48hmvjE4BGhIWjJsxs4tPUfkH8qUk10qUTN+Esnt1JNX/wIebPaSpJb38DMbQUMUQ4Xz3WbgCCwCgZSvlazg8Fe4eZ13ZsqUcjQ0G9cQVFQ8nOsOud9dCzx6rJSrNLcnmBRB4L1EJ4IGg9unXY4=
+    secure: bssoQ8msrlYrGZUgZpHKSy+GbaVK9gN/mmec4KUUTWLeNIXqKWopAMrMylJDON5aakn1p8Ef+zk7klNCs795B6bl+WvgC2/edJXgG64N+ndg8MbEt2kuRXRriyJbBPMnJ4bVJZBNvCRgVCgN1BxufGua1ncwE9e8El9M+IwU0d/Vs/gWmfzeKoJ2eAoLHo5f98OhU1mIkdWKG8mdvuvEfn2OR2A3c6rQMg0TfNO9Gg3EXyAYEGuIsmRWbzFo7DJu46nvp0f8QxdU4l7SQcKhKCNr163PtPED43xWdDCIKskkxt7q7940hw+FpyICcZO8DkUS0QotU7sOqtxeqkZqKocr1tqA6tBYwjCLWIsYJmS+BluN1haozqCRge43KiZbThlyoYGgi7UM91GH98suKv0RuPux/KWgUaGy8PjYYzUr26Wh/SHI+EejBHnBvh2pXwVRFlWuF+pNWk8Z2hu0gXk76NUTlXKoo2P+6L2hKFc9FANMmVfMqplWzy8rVGvs/MJxqKO87UqmCS7GPUhz/VfGfYlR11+4uxdQ36q+3igSSdQZtGBVb3QIqN68fPHX9UUyrOid+ut832ql85wp+V0++x++B5uJRDY78pSfikofxwj6pRnXG01DbbpGCVZIfAWiscPjsX9ZCNepK78IwrYLd/NLG2hr0x4wncEat/I=
   organization: pivot-poyarzun
-  space: development
+  space: playground
   on:
     repo: Logiraptor/patrickoyarzun
     tags: true
-
