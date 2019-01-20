@@ -3,3 +3,4 @@ applications:
 - name: poyarzun
   path: site/public/
   buildpack: staticfile_buildpack
+  memory: 1G
