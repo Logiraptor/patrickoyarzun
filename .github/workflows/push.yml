@@ -1,0 +1,21 @@
+on: push
+name: Deploy changes
+jobs:
+  filterMasterBranch:
+    name: Filter master branch
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Filter master branch
+      uses: actions/bin/filter@master
+      with:
+        args: branch master
+    - name: deploy
+      uses: ./deploy-action
+      env:
+        CF_API: ${{ secrets.CF_API }}
+        CF_APP: ${{ secrets.CF_APP }}
+        CF_ORG: ${{ secrets.CF_ORG }}
+        CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+        CF_SPACE: ${{ secrets.CF_SPACE }}
+        CF_USERNAME: ${{ secrets.CF_USERNAME }}
